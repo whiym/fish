@@ -53,7 +53,7 @@ func (cbc *cbc) encrypt(msg string) (string, error) {
 }
 
 func (cbc *cbc) decrypt(msg string) (string, error) {
-	trimmed, ok := cbc.Trim(msg)
+	trimmed, ok := cbc.trim(msg)
 	if !ok {
 		return msg, nil
 	}
@@ -72,7 +72,7 @@ func (cbc *cbc) decrypt(msg string) (string, error) {
 	return string(decrypted[blowfish.BlockSize:]), nil
 }
 
-func (cbc *cbc) Trim(src string) (string, bool) {
+func (cbc *cbc) trim(src string) (string, bool) {
 	switch {
 	case strings.HasPrefix(src, CBC_PREFIX_OK):
 		return strings.TrimPrefix(src, CBC_PREFIX_OK), true

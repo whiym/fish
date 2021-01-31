@@ -1,21 +1,33 @@
 package fish
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	KEY     = "blowfish"
-	NEW_KEY = "newkey"
-	BAD_KEY = ""
+	EBC_KEY     = "blowfish"
+	EBC_KEY_NEW = "newkey"
+	CBC_KEY     = "cbc:blowfish"
+	BAD_KEY     = ""
 )
 
 func TestNewFish(t *testing.T) {
-	f, err := NewFish(KEY)
+	f, err := NewFish(EBC_KEY)
 	assert.NoError(t, err)
 	assert.NotNil(t, f)
+	assert.Equal(t, MODE_EBC, f.mode)
+	assert.Equal(t, EBC_KEY, f.key)
+	assert.NotNil(t, f.cipher)
+
+	f, err = NewFish(CBC_KEY)
+	assert.NoError(t, err)
+	assert.NotNil(t, f)
+	assert.Equal(t, MODE_CBC, f.mode)
+	assert.Equal(t, strings.TrimPrefix(CBC_KEY, KEY_PREFIX_CBC), f.key)
+	assert.NotNil(t, f.cipher)
 
 	f, err = NewFish(BAD_KEY)
 	assert.Error(t, err)
@@ -23,51 +35,18 @@ func TestNewFish(t *testing.T) {
 }
 
 func TestFish_UpdateKey(t *testing.T) {
-	f, err := NewFish(KEY)
+	f, err := NewFish(EBC_KEY)
 	assert.NoError(t, err)
 
 	err = f.UpdateKey(BAD_KEY)
 	assert.Error(t, err)
-	assert.Equal(t, KEY, f.key)
+	assert.Equal(t, EBC_KEY, f.key)
 
 	orig := *f
 
-	err = f.UpdateKey(NEW_KEY)
+	err = f.UpdateKey(EBC_KEY_NEW)
 	assert.NoError(t, err)
-	assert.Equal(t, NEW_KEY, f.key)
+	assert.Equal(t, EBC_KEY_NEW, f.key)
 	assert.NotEqual(t, orig.key, f.key)
 	assert.NotEqual(t, orig.cipher, f.cipher)
-}
-
-var CASES = []struct {
-	encrypted string
-	decrypted string
-}{
-	{"+OK qKKBR.riU410", "qwertyui"},
-	{"+OK Ee5Cz.Dgr1q1", "qwerty"},
-	{"+OK qKKBR.riU410bpm4f/1UAmL0", "qwertyuiop"},
-	{
-		"+OK qKKBR.riU410sK.30/GVDts.ewTqf.5tm3p/Ol.d.0DH23r/m9tTw.Rmpbj1",
-		"qwertyuiopasdfghjklzxcvbnm1234567890",
-	},
-}
-
-func TestFish_Encrypt(t *testing.T) {
-	f, err := NewFish(KEY)
-	assert.NoError(t, err)
-
-	for i, c := range CASES {
-		encrypted := f.Encrypt(c.decrypted)
-		assert.Equal(t, c.encrypted, encrypted, "case: %d", i)
-	}
-}
-
-func TestFish_Decrypt(t *testing.T) {
-	f, err := NewFish(KEY)
-	assert.NoError(t, err)
-
-	for i, c := range CASES {
-		decrypted := f.Decrypt(c.encrypted)
-		assert.Equal(t, c.decrypted, decrypted, "case: %d", i)
-	}
 }
