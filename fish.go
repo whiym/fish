@@ -16,6 +16,7 @@ const (
 
 const KEY_PREFIX_CBC = "cbc:"
 
+// Fish is an IRC Blowfish encryption cipher using a specific key and block mode.
 type Fish struct {
 	key    string
 	mode   Mode
@@ -27,6 +28,8 @@ type fishCipher interface {
 	decrypt(string) (string, error)
 }
 
+// NewFish creates and returns a Fish for the specified key. To use CBC block mode the key must be prepended with
+// "cbc:". Fails if the key is invalid.
 func NewFish(key string) (*Fish, error) {
 	key, mode, cipher, err := newFish(key)
 	if err != nil {
@@ -40,6 +43,8 @@ func NewFish(key string) (*Fish, error) {
 	}, nil
 }
 
+// UpdateKey updates the Fish based on the new key. To use CBC block mode the key must be prepended with "cbc:". Fails
+// if the key is invalid.
 func (f *Fish) UpdateKey(key string) error {
 	key, mode, cipher, err := newFish(key)
 	if err != nil {
@@ -72,10 +77,13 @@ func newFish(key string) (string, Mode, fishCipher, error) {
 	return key, mode, newCBC(blow), nil
 }
 
+// Encrypt encrypts the specified msg and returns it. Fails for CBC mode if random bytes cannot be prepended to the
+// message.
 func (f *Fish) Encrypt(msg string) (string, error) {
 	return f.cipher.encrypt(msg)
 }
 
+// Decrypt decrypts the specified msg and returns it. Fails for CBC mode if the decrypted string cannot be decoded.
 func (f *Fish) Decrypt(msg string) (string, error) {
 	return f.cipher.decrypt(msg)
 }
