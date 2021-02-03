@@ -8,45 +8,45 @@ import (
 )
 
 const (
-	EBC_KEY     = "blowfish"
-	EBC_KEY_NEW = "newkey"
-	CBC_KEY     = "cbc:blowfish"
-	BAD_KEY     = ""
+	ebcKey    = "blowfish"
+	ebcKeyNew = "newkey"
+	cbcKey    = "cbc:blowfish"
+	badKey    = ""
 )
 
 func TestNewFish(t *testing.T) {
-	f, err := NewFish(EBC_KEY)
+	f, err := NewFish(ebcKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, f)
-	assert.Equal(t, MODE_EBC, f.mode)
-	assert.Equal(t, EBC_KEY, f.key)
+	assert.Equal(t, ModeEBC, f.mode)
+	assert.Equal(t, ebcKey, f.key)
 	assert.NotNil(t, f.cipher)
 
-	f, err = NewFish(CBC_KEY)
+	f, err = NewFish(cbcKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, f)
-	assert.Equal(t, MODE_CBC, f.mode)
-	assert.Equal(t, strings.TrimPrefix(CBC_KEY, KEY_PREFIX_CBC), f.key)
+	assert.Equal(t, ModeCBC, f.mode)
+	assert.Equal(t, strings.TrimPrefix(cbcKey, KeyPrefixCBC), f.key)
 	assert.NotNil(t, f.cipher)
 
-	f, err = NewFish(BAD_KEY)
+	f, err = NewFish(badKey)
 	assert.Error(t, err)
 	assert.Nil(t, f)
 }
 
 func TestFish_UpdateKey(t *testing.T) {
-	f, err := NewFish(EBC_KEY)
+	f, err := NewFish(ebcKey)
 	assert.NoError(t, err)
 
-	err = f.UpdateKey(BAD_KEY)
+	err = f.UpdateKey(badKey)
 	assert.Error(t, err)
-	assert.Equal(t, EBC_KEY, f.key)
+	assert.Equal(t, ebcKey, f.key)
 
 	orig := *f
 
-	err = f.UpdateKey(EBC_KEY_NEW)
+	err = f.UpdateKey(ebcKeyNew)
 	assert.NoError(t, err)
-	assert.Equal(t, EBC_KEY_NEW, f.key)
+	assert.Equal(t, ebcKeyNew, f.key)
 	assert.NotEqual(t, orig.key, f.key)
 	assert.NotEqual(t, orig.cipher, f.cipher)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func TestFish_CBCEncryptDecrypt(t *testing.T) {
-	f, err := NewFish(CBC_KEY)
+	f, err := NewFish(cbcKey)
 	assert.NoError(t, err)
 
 	cases := []int{3, 8, 14, 256, 500}
@@ -30,7 +30,7 @@ func TestFish_CBCEncryptDecrypt(t *testing.T) {
 }
 
 func TestFish_CBCDecrypt(t *testing.T) {
-	f, err := NewFish(CBC_KEY)
+	f, err := NewFish(cbcKey)
 	assert.NoError(t, err)
 
 	cases := []string{

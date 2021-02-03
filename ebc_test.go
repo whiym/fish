@@ -20,7 +20,7 @@ var cases = []struct {
 }
 
 func TestFish_EBCEncrypt(t *testing.T) {
-	f, err := NewFish(EBC_KEY)
+	f, err := NewFish(ebcKey)
 	assert.NoError(t, err)
 
 	for i, c := range cases {
@@ -31,7 +31,7 @@ func TestFish_EBCEncrypt(t *testing.T) {
 }
 
 func TestFish_EBCDecrypt(t *testing.T) {
-	f, err := NewFish(EBC_KEY)
+	f, err := NewFish(ebcKey)
 	assert.NoError(t, err)
 
 	for i, c := range cases {

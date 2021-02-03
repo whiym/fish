@@ -28,8 +28,8 @@ func newCBC(blow *blowfish.Cipher) *cbc {
 }
 
 const (
-	CBC_PREFIX_OK   = "+OK *"
-	CBC_PREFIX_MCPS = "mcps *"
+	CBCPrefixOK   = "+OK *"
+	CBCPrefixMCPS = "mcps *"
 )
 
 func (cbc *cbc) encrypt(msg string) (string, error) {
@@ -49,7 +49,7 @@ func (cbc *cbc) encrypt(msg string) (string, error) {
 	encoded := make([]byte, base64.StdEncoding.EncodedLen(len(encrypted)))
 	base64.StdEncoding.Encode(encoded, encrypted)
 
-	return CBC_PREFIX_OK + string(encoded), nil
+	return CBCPrefixOK + string(encoded), nil
 }
 
 func (cbc *cbc) decrypt(msg string) (string, error) {
@@ -74,10 +74,10 @@ func (cbc *cbc) decrypt(msg string) (string, error) {
 
 func (cbc *cbc) trim(src string) (string, bool) {
 	switch {
-	case strings.HasPrefix(src, CBC_PREFIX_OK):
-		return strings.TrimPrefix(src, CBC_PREFIX_OK), true
-	case strings.HasPrefix(src, CBC_PREFIX_MCPS):
-		return strings.TrimPrefix(src, CBC_PREFIX_MCPS), true
+	case strings.HasPrefix(src, CBCPrefixOK):
+		return strings.TrimPrefix(src, CBCPrefixOK), true
+	case strings.HasPrefix(src, CBCPrefixMCPS):
+		return strings.TrimPrefix(src, CBCPrefixMCPS), true
 	default:
 		return src, false
 	}

@@ -11,11 +11,11 @@ import (
 type Mode uint8
 
 const (
-	MODE_EBC Mode = iota
-	MODE_CBC
+	ModeEBC Mode = iota
+	ModeCBC
 )
 
-const KEY_PREFIX_CBC = "cbc:"
+const KeyPrefixCBC = "cbc:"
 
 // Fish is an IRC Blowfish encryption cipher using a specific key and block mode.
 type Fish struct {
@@ -64,12 +64,12 @@ func (f *Fish) UpdateKey(key string) error {
 func newFish(key string) (*Fish, error) {
 	fish := &Fish{
 		key:  key,
-		mode: MODE_EBC,
+		mode: ModeEBC,
 	}
 
-	if strings.HasPrefix(key, KEY_PREFIX_CBC) {
-		fish.mode = MODE_CBC
-		fish.key = strings.TrimPrefix(key, KEY_PREFIX_CBC)
+	if strings.HasPrefix(key, KeyPrefixCBC) {
+		fish.mode = ModeCBC
+		fish.key = strings.TrimPrefix(key, KeyPrefixCBC)
 	}
 
 	blow, err := blowfish.NewCipher([]byte(fish.key))
@@ -77,7 +77,7 @@ func newFish(key string) (*Fish, error) {
 		return nil, err
 	}
 
-	if fish.mode == MODE_EBC {
+	if fish.mode == ModeEBC {
 		fish.cipher = newEBC(blow)
 	} else {
 		fish.cipher = newCBC(blow)
