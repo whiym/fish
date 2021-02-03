@@ -3,6 +3,7 @@ package fish
 import (
 	"bytes"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/blowfish"
 )
@@ -21,6 +22,7 @@ type Fish struct {
 	key    string
 	mode   Mode
 	cipher fishCipher
+	mu     *sync.RWMutex
 }
 
 type fishCipher interface {
@@ -31,70 +33,89 @@ type fishCipher interface {
 // NewFish creates and returns a Fish for the specified key. To use CBC block mode the key must be prepended with
 // "cbc:". Fails if the key is invalid.
 func NewFish(key string) (*Fish, error) {
-	key, mode, cipher, err := newFish(key)
+	fish, err := newFish(key)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Fish{
-		key:    key,
-		mode:   mode,
-		cipher: cipher,
-	}, nil
+	fish.mu = &sync.RWMutex{}
+
+	return fish, nil
 }
 
 // UpdateKey updates the Fish based on the new key. To use CBC block mode the key must be prepended with "cbc:". Fails
 // if the key is invalid.
 func (f *Fish) UpdateKey(key string) error {
-	key, mode, cipher, err := newFish(key)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	fish, err := newFish(key)
 	if err != nil {
 		return err
 	}
 
-	f.key = key
-	f.mode = mode
-	f.cipher = cipher
+	mu := f.mu
+	*f = *fish
+	f.mu = mu
 
 	return nil
 }
 
-func newFish(key string) (string, Mode, fishCipher, error) {
-	mode := MODE_EBC
+func newFish(key string) (*Fish, error) {
+	fish := &Fish{
+		key:  key,
+		mode: MODE_EBC,
+	}
+
 	if strings.HasPrefix(key, KEY_PREFIX_CBC) {
-		mode = MODE_CBC
-		key = strings.TrimPrefix(key, KEY_PREFIX_CBC)
+		fish.mode = MODE_CBC
+		fish.key = strings.TrimPrefix(key, KEY_PREFIX_CBC)
 	}
 
-	blow, err := blowfish.NewCipher([]byte(key))
+	blow, err := blowfish.NewCipher([]byte(fish.key))
 	if err != nil {
-		return "", 0, nil, err
+		return nil, err
 	}
 
-	if mode == MODE_EBC {
-		return key, mode, newEBC(blow), nil
+	if fish.mode == MODE_EBC {
+		fish.cipher = newEBC(blow)
+	} else {
+		fish.cipher = newCBC(blow)
 	}
 
-	return key, mode, newCBC(blow), nil
+	return fish, nil
 }
 
 // Mode returns the block mode of the Fish.
 func (f *Fish) Mode() Mode {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
 	return f.mode
 }
 
 // Key returns the key of the Fish.
 func (f *Fish) Key() string {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
 	return f.key
 }
 
 // Encrypt encrypts the specified msg and returns it. Fails for CBC mode if random bytes cannot be prepended to the
 // message.
 func (f *Fish) Encrypt(msg string) (string, error) {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
 	return f.cipher.encrypt(msg)
 }
 
 // Decrypt decrypts the specified msg and returns it. Fails for CBC mode if the decrypted string cannot be decoded.
 func (f *Fish) Decrypt(msg string) (string, error) {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+
 	return f.cipher.decrypt(msg)
 }
 
