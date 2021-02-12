@@ -86,22 +86,6 @@ func newFish(key string) (*Fish, error) {
 	return fish, nil
 }
 
-// Mode returns the block mode of the Fish.
-func (f *Fish) Mode() Mode {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
-
-	return f.mode
-}
-
-// Key returns the key of the Fish.
-func (f *Fish) Key() string {
-	f.mu.RLock()
-	defer f.mu.RUnlock()
-
-	return f.key
-}
-
 // Encrypt encrypts the specified msg and returns it. Fails for CBC mode if random bytes cannot be prepended to the
 // message.
 func (f *Fish) Encrypt(msg string) (string, error) {
