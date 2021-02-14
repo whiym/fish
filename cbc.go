@@ -27,6 +27,7 @@ func newCBC(blow *blowfish.Cipher) *cbc {
 	}
 }
 
+// CBC message prefixes.
 const (
 	CBCPrefixOK   = "+OK *"
 	CBCPrefixMCPS = "mcps *"

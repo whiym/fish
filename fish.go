@@ -8,22 +8,23 @@ import (
 	"golang.org/x/crypto/blowfish"
 )
 
-type Mode uint8
-
-const (
-	ModeEBC Mode = iota
-	ModeCBC
-)
-
+// KeyPrefixCBC is the key prefix required to specify CBC mode.
 const KeyPrefixCBC = "cbc:"
 
 // Fish is an IRC Blowfish encryption cipher using a specific key and block mode.
 type Fish struct {
 	key    string
-	mode   Mode
+	mode   mode
 	cipher fishCipher
 	mu     *sync.RWMutex
 }
+
+type mode uint8
+
+const (
+	modeEBC mode = iota
+	modeCBC
+)
 
 type fishCipher interface {
 	encrypt(string) (string, error)
@@ -64,11 +65,11 @@ func (f *Fish) UpdateKey(key string) error {
 func newFish(key string) (*Fish, error) {
 	fish := &Fish{
 		key:  key,
-		mode: ModeEBC,
+		mode: modeEBC,
 	}
 
 	if strings.HasPrefix(key, KeyPrefixCBC) {
-		fish.mode = ModeCBC
+		fish.mode = modeCBC
 		fish.key = strings.TrimPrefix(key, KeyPrefixCBC)
 	}
 
@@ -77,7 +78,7 @@ func newFish(key string) (*Fish, error) {
 		return nil, err
 	}
 
-	if fish.mode == ModeEBC {
+	if fish.mode == modeEBC {
 		fish.cipher = newEBC(blow)
 	} else {
 		fish.cipher = newCBC(blow)

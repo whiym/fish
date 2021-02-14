@@ -18,14 +18,14 @@ func TestNewFish(t *testing.T) {
 	f, err := NewFish(ebcKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, f)
-	assert.Equal(t, ModeEBC, f.mode)
+	assert.Equal(t, modeEBC, f.mode)
 	assert.Equal(t, ebcKey, f.key)
 	assert.NotNil(t, f.cipher)
 
 	f, err = NewFish(cbcKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, f)
-	assert.Equal(t, ModeCBC, f.mode)
+	assert.Equal(t, modeCBC, f.mode)
 	assert.Equal(t, strings.TrimPrefix(cbcKey, KeyPrefixCBC), f.key)
 	assert.NotNil(t, f.cipher)
 

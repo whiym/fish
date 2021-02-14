@@ -13,10 +13,4 @@ see [BASE64.md](BASE64.md) for an explanation of the unique base64 encoding sche
 The **CBC** implementation is based off the extension of FiSH-irssi by
 [falsovsky](https://github.com/falsovsky/FiSH-irssi) for compatibility with mircryption.
 
-To use **CBC** mode the key must be prefixed with `cbc:`
-
-
-
-
-
-
+To use **CBC** mode the key must be prepended with `cbc:`

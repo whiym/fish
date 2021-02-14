@@ -15,6 +15,7 @@ func newEBC(blow *blowfish.Cipher) *ebc {
 	return &ebc{blow: blow}
 }
 
+// EBC message prefixes.
 const (
 	EBCPrefixOK   = "+OK "
 	EBCPrefixMCPS = "mcps "
@@ -41,7 +42,7 @@ func (ebc *ebc) decrypt(msg string) (string, error) {
 	return string(decrypted), nil
 }
 
-const EBCB64Charset = "./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const ebcB64Charset = "./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func (ebc *ebc) base64Encode(src []byte) []byte {
 	src = pad(src, blowfish.BlockSize)
@@ -57,11 +58,11 @@ func (ebc *ebc) base64Encode(src []byte) []byte {
 		}
 
 		for i := 0; i < 6; i, d = i+1, d+1 {
-			dst[d] = EBCB64Charset[right&0x3f]
+			dst[d] = ebcB64Charset[right&0x3f]
 			right >>= 6
 		}
 		for i := 0; i < 6; i, d = i+1, d+1 {
-			dst[d] = EBCB64Charset[left&0x3f]
+			dst[d] = ebcB64Charset[left&0x3f]
 			left >>= 6
 		}
 	}
@@ -73,20 +74,20 @@ func (ebc *ebc) base64EncodedLen(n int) int {
 	return n * 6 / 4
 }
 
-const EBCB64EncodedBlockSize = 12
+const encB64EncodedBlockSize = 12
 
 func (ebc *ebc) base64Decode(src []byte) []byte {
-	src = pad(src, EBCB64EncodedBlockSize)
+	src = pad(src, encB64EncodedBlockSize)
 	dst := make([]byte, ebc.base64DecodedLen(len(src)))
 
 	for s, d := 0, 0; s < len(src); {
 		var left, right uint32
 
 		for i := 0; i < 6; i, s = i+1, s+1 {
-			right |= uint32(strings.Index(EBCB64Charset, string(src[s]))) << (6 * i)
+			right |= uint32(strings.Index(ebcB64Charset, string(src[s]))) << (6 * i)
 		}
 		for i := 0; i < 6; i, s = i+1, s+1 {
-			left |= uint32(strings.Index(EBCB64Charset, string(src[s]))) << (6 * i)
+			left |= uint32(strings.Index(ebcB64Charset, string(src[s]))) << (6 * i)
 		}
 
 		for i := 0; i < 4; i, d = i+1, d+1 {
