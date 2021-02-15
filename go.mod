@@ -1,4 +1,4 @@
-module fish
+module github.com/whiym/fish
 
 go 1.14
 
