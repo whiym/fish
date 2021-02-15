@@ -1,6 +1,8 @@
 Fish
 ====
 
+[![GoDoc](https://pkg.go.dev/badge/github.com/whiym/fish)](https://pkg.go.dev/github.com/whiym/fish)
+
 Fish is a Go implementation for IRC FiSH encryption. It uses the [Blowfish](x) cipher to encrypt/decrypt messages in
 **EBC** and **CBC** modes based on a symmetric key. 
 
